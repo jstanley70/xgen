@@ -141,6 +141,23 @@ func (gen *CodeGenerator) TypeScriptSimpleType(v *SimpleType) {
 	}
 }
 
+func (gen *CodeGenerator) TypeScriptAttributes(v *ComplexType) {
+	content := " {\n"
+	for _, attribute := range v.Attributes {
+		var optional string
+		if attribute.Optional {
+			optional = ` | null`
+		}
+		fieldType := genTypeScriptFieldType(getBasefromSimpleType(trimNSPrefix(attribute.Type), gen.ProtoTree), attribute.Plural)
+		content += fmt.Sprintf("\t%s: %s%s;\n", genTypeScriptFieldName(attribute.Name, false), fieldType, optional)
+	}
+	content += "}\n"
+	gen.StructAST[v.Name] = content
+	fieldName := genTypeScriptFieldName(v.Name, true)
+	typeExtension := ""
+	gen.Field += fmt.Sprintf("%sexport class %sAttributes%s%s", genFieldComment(fieldName, v.Doc, "//"), fieldName, typeExtension, gen.StructAST[v.Name])
+}
+
 // TypeScriptComplexType generates code for complex type XML schema in TypeScript language
 // syntax.
 func (gen *CodeGenerator) TypeScriptComplexType(v *ComplexType) {
@@ -150,15 +167,11 @@ func (gen *CodeGenerator) TypeScriptComplexType(v *ComplexType) {
 			fieldType := getBasefromSimpleType(trimNSPrefix(attrGroup.Ref), gen.ProtoTree)
 			content += fmt.Sprintf("\t%s: %s;\n", genTypeScriptFieldName(attrGroup.Name, false), genTypeScriptFieldType(fieldType, false))
 		}
-
-		for _, attribute := range v.Attributes {
-			var optional string
-			if attribute.Optional {
-				optional = ` | null`
-			}
-			fieldType := genTypeScriptFieldType(getBasefromSimpleType(trimNSPrefix(attribute.Type), gen.ProtoTree), attribute.Plural)
-			content += fmt.Sprintf("\t%sAttr: %s%s;\n", genTypeScriptFieldName(attribute.Name, false), fieldType, optional)
+		if len(v.Attributes) > 0 {
+			TypeScriptAttributes(v)
+			content += fmt.Sprintf("\t$: %s%s;\n", v.Name, "Attributes")
 		}
+
 		for _, group := range v.Groups {
 			content += fmt.Sprintf("\t%s: %s;\n", genTypeScriptFieldName(group.Name, false), genTypeScriptFieldType(getBasefromSimpleType(trimNSPrefix(group.Ref), gen.ProtoTree), group.Plural))
 		}
@@ -184,6 +197,11 @@ func (gen *CodeGenerator) TypeScriptComplexType(v *ComplexType) {
 
 		gen.Field += fmt.Sprintf("%sexport class %s%s%s", genFieldComment(fieldName, v.Doc, "//"), fieldName, typeExtension, gen.StructAST[v.Name])
 	}
+
+}
+
+func TypeScriptAttributes(v *ComplexType) {
+	panic("unimplemented")
 }
 
 func isBuiltInTypeScriptType(typeName string) bool {
