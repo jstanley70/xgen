@@ -64,7 +64,7 @@ func genTypeScriptFieldName(name string, unique bool) (fieldName string) {
 			fieldName = fmt.Sprintf("%s%d", fieldName, count)
 		}
 	}
-	return
+	return fieldName
 }
 
 func genTypeScriptFieldType(name string, plural bool) (fieldType string) {
@@ -122,13 +122,14 @@ func (gen *CodeGenerator) TypeScriptSimpleType(v *SimpleType) {
 		var content string
 		baseType := genTypeScriptFieldType(getBasefromSimpleType(trimNSPrefix(v.Base), gen.ProtoTree), false)
 		for _, enum := range v.Restriction.Enum {
+			enumName := genTypeScriptFieldName(enum, true)
 			switch baseType {
 			case "string":
-				content += fmt.Sprintf("\t%s = '%s',\n", enum, enum)
+				content += fmt.Sprintf("\t%s = '%s',\n", enumName, enum)
 			case "number":
-				content += fmt.Sprintf("\tEnum%s = %s,\n", enum, enum)
+				content += fmt.Sprintf("\tEnum%s = %s,\n", enumName, enum)
 			default:
-				content += fmt.Sprintf("\tEnum%s = '%s',\n", enum, enum)
+				content += fmt.Sprintf("\tEnum%s = '%s',\n", enumName, enum)
 			}
 		}
 		fieldName := genTypeScriptFieldName(v.Name, true)
