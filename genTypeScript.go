@@ -76,7 +76,7 @@ func genTypeScriptFieldType(name string, plural bool) (fieldType string) {
 		fieldType += MakeFirstUpperCase(str)
 	}
 	fieldType = MakeFirstUpperCase(strings.Replace(fieldType, "-", "_", -1))
-	fieldType = MakeFirstUpperCase(strings.Replace(fieldType, " ", "_", -1))
+	fieldType = strings.Replace(fieldType, " ", "_", -1)
 	if fieldType == "" || fieldType == "Any" {
 		fieldType = "any"
 	}

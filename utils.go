@@ -185,7 +185,8 @@ func trimNSPrefix(str string) (name string) {
 
 // MakeFirstUpperCase make the first letter of a string uppercase.
 func MakeFirstUpperCase(s string) string {
-	return ToTitle(s)
+	//return ToTitle(s)
+	return s
 }
 
 func ToTitle(val string) string {
